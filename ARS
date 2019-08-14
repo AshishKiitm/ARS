@@ -1,0 +1,191 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# # ASR
+
+# Libraries used in analysis
+# * pip install SpeechRecognition
+# ---
+# https://data-flair.training/blogs/python-speech-recognition-ai/
+
+# ## <font color='blue'>1. Importing the .wav file</font>
+
+# Supported File Types in Python Speech Recognition
+# * WAV- PCM/LPCM format
+# * AIFF
+# * AIFF-C
+# * FLAC
+
+# In[1]:
+
+
+get_ipython().run_line_magic('reset', '-f')
+
+
+# # Signal processing is required prior to feeding the sound data
+
+# In[2]:
+
+
+import IPython
+AudioName = "data.wav" # Audio File
+IPython.display.Audio(AudioName)
+
+
+# In[3]:
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.io import wavfile
+
+
+# In[4]:
+
+
+frequency_sampling, audio_signal = wavfile.read(AudioName)
+
+
+# In[5]:
+
+
+print('\nSignal shape:', audio_signal.shape)
+print('Signal Datatype:', audio_signal.dtype)
+print('Signal duration:', round(audio_signal.shape[0] / float(frequency_sampling), 2), 'seconds')
+
+
+# In[6]:
+
+
+from scipy.io import wavfile # scipy library to read wav files
+fs, Audiodata = wavfile.read(AudioName)
+
+# Plot the audio signal in time
+import matplotlib.pyplot as plt
+plt.plot(Audiodata)
+plt.title('Audio signal in time',size=16)
+plt.xlabel('Time (milliseconds)')
+plt.ylabel('Amplitude')
+plt.title('Input audio signal')
+plt.show()
+
+
+# In[7]:
+
+
+# spectrum
+from scipy.fftpack import fft # fourier transform
+n = len(Audiodata) 
+AudioFreq = fft(Audiodata)
+AudioFreq = AudioFreq[0:int(np.ceil((n+1)/2.0))] #Half of the spectrum
+MagFreq = np.abs(AudioFreq) # Magnitude
+MagFreq = MagFreq / float(n)
+# power spectrum
+MagFreq = MagFreq**2
+if n % 2 > 0: # ffte odd 
+    MagFreq[1:len(MagFreq)] = MagFreq[1:len(MagFreq)] * 2
+else:# fft even
+    MagFreq[1:len(MagFreq) -1] = MagFreq[1:len(MagFreq) - 1] * 2 
+
+plt.figure()
+freqAxis = np.arange(0,int(np.ceil((n+1)/2.0)), 1.0) * (fs / n);
+plt.plot(freqAxis/1000.0, 10*np.log10(MagFreq)) #Power spectrum
+plt.xlabel('Frequency (kHz)'); plt.ylabel('Power spectrum (dB)');
+
+
+# In[8]:
+
+
+import speech_recognition as sr
+r = sr.Recognizer()
+harvard = sr.AudioFile(AudioName )
+
+
+# In[9]:
+
+
+data=[]
+dataprime=[]
+audio1=[]
+audio2=[]
+with harvard as source:
+    r.adjust_for_ambient_noise(source)
+    for i in range(0,int(audio_signal.shape[0] // (float(frequency_sampling*60)))):#3 minute
+        audio1 = r.record(source,duration=60)
+        dataprime.append(audio1)
+    audio2 = r.record(source,offset=0.5,duration=10)#audio data for remaining time
+   
+
+
+# In[10]:
+
+
+data=[]
+for i in range(len(dataprime)):
+    data.append(r.recognize_google(dataprime[i],language='en-IN')) 
+
+
+# In[11]:
+
+
+data.append(r.recognize_google(audio2,language='en-IN'))
+
+
+# To do the language selection
+# https://cloud.google.com/speech-to-text/docs/languages
+
+# In[12]:
+
+
+data
+
+
+# In[13]:
+
+
+final_data=' '.join(data)
+
+
+# In[14]:
+
+
+final_data
+
+
+# In[ ]:
+
+
+
+
+
+# ## <font color='blue'>2. Converting audio to text</font>
+
+# In[ ]:
+
+
+
+
+
+# ## <font color='blue'>3. Data preprocessing</font>
+
+# In[ ]:
+
+
+
+
+
+# ## <font color='blue'>4. Feature extraction</font>
+
+# In[ ]:
+
+
+
+
+
+# ## <font color='blue'>5. Machine learning analysis</font>
+
+# In[ ]:
+
+
+
+
